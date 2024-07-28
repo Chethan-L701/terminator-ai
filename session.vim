@@ -13,7 +13,7 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +1 ~/Workspace/Rust/gemini-cli/src/main.rs
+badd +292 ~/Workspace/Rust/gemini-cli/src/main.rs
 argglobal
 %argdel
 edit ~/Workspace/Rust/gemini-cli/src/main.rs
@@ -34,71 +34,90 @@ setlocal fml=1
 setlocal fdn=0
 setlocal fen
 silent! normal! zE
-11,12fold
-11,13fold
-11,14fold
-11,15fold
-11,16fold
-10,17fold
-21,22fold
-21,23fold
-21,24fold
-21,25fold
-19,26fold
-28,38fold
-40,42fold
-52,55fold
-68,72fold
-67,76fold
-67,79fold
-67,79fold
-82,84fold
-82,86fold
-82,89fold
-82,92fold
-82,94fold
-82,94fold
-82,94fold
-82,94fold
-82,94fold
-81,95fold
-97,100fold
-102,105fold
-112,115fold
-131,132fold
-131,133fold
+13,14fold
+13,15fold
+13,16fold
+13,17fold
+13,18fold
+12,19fold
+23,24fold
+23,25fold
+23,26fold
+23,27fold
+21,28fold
+30,40fold
+44,45fold
+44,46fold
+44,47fold
+44,48fold
+50,54fold
+50,56fold
+50,56fold
+42,57fold
+59,63fold
+65,67fold
+78,81fold
+98,102fold
+97,106fold
+97,109fold
+97,109fold
+113,115fold
+116,118fold
+119,122fold
+123,126fold
+127,129fold
 130,134fold
-130,135fold
-130,136fold
-130,137fold
-130,138fold
-130,139fold
-130,140fold
-130,141fold
+135,138fold
+112,140fold
+111,141fold
 143,146fold
-148,150fold
-154,160fold
-154,161fold
-153,162fold
-165,169fold
-165,170fold
-164,171fold
-174,177fold
-173,178fold
-122,179fold
-122,181fold
-122,181fold
-61,182fold
-183,186fold
-61,187fold
-61,187fold
-44,190fold
+148,151fold
+158,161fold
+165,186fold
+164,187fold
+188,202fold
+164,203fold
+164,203fold
+217,218fold
+217,219fold
+216,220fold
+216,221fold
+216,222fold
+216,223fold
+216,224fold
+216,225fold
+216,226fold
+216,227fold
+229,232fold
+234,236fold
+241,247fold
+241,248fold
+240,249fold
+239,250fold
+252,261fold
+252,262fold
+251,263fold
+239,264fold
+239,264fold
+267,271fold
+267,272fold
+266,273fold
+276,279fold
+275,280fold
+208,281fold
+208,283fold
+208,283fold
+87,284fold
+285,288fold
+87,289fold
+87,289fold
+69,292fold
 let &fdl = &fdl
-let s:l = 2 - ((1 * winheight(0) + 21) / 43)
+let s:l = 292 - ((42 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 2
+keepjumps 292
 normal! 0
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'

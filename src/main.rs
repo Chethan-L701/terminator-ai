@@ -5,7 +5,9 @@ use serde_json::{self, Value};
 use std::env;
 use std::ffi::CString;
 use std::fs::{self, File};
-use std::io::{Read, Result, Write};
+use std::io::{ErrorKind, Read, Result, Write};
+use std::path;
+use std::process::Command;
 
 fn open(file_path: &String) -> Result<std::fs::File> {
     fs::OpenOptions::new()
@@ -37,6 +39,29 @@ fn process_newlines(input: &str) -> String {
     return result;
 }
 
+fn read_image(path: &str) -> Result<String> {
+    println!("Enter the image path :");
+    let output = Command::new("base64")
+        .arg("-w0")
+        .arg(path.trim())
+        .output()
+        .unwrap();
+
+    if output.status.success() {
+        println!("Command exucuted successfully");
+        let data = String::from_utf8(output.stdout.clone()).unwrap();
+        return Ok(data);
+    } else {
+        return Err(ErrorKind::Other.into());
+    }
+}
+
+fn get_absolute_path(path: &str) -> Result<String> {
+    let path = path::Path::new(path);
+    let absolute_path = path.canonicalize()?;
+    Ok(absolute_path.to_str().unwrap().to_string())
+}
+
 extern "C" {
     pub fn run(file: *const u8);
 }
@@ -48,6 +73,7 @@ fn main() -> Result<()> {
     let mut prompt_set = false;
     let mut print_raw = false;
     let mut clear_recent = false;
+    let mut include_image = false;
 
     if args.len() <= 1 {
         println!("{} : No arguments provided", "Error".red());
@@ -62,8 +88,12 @@ fn main() -> Result<()> {
         let mut easy = Easy::new();
         let dir = env::var("GEMINI_DIR");
 
-        let response_path: String;
+        let mut response_path: String;
         let mut result_path: String;
+
+        let mut image_path: String = String::new();
+        let mut image_data: String = String::new();
+
         if dir.is_err() {
             println!(
                 "{} : GEMINI_DIR env is not set, using current directory {} ",
@@ -79,18 +109,34 @@ fn main() -> Result<()> {
         }
 
         for (index, flag) in args.iter().enumerate() {
-            if flag == "--output" {
-                result_path = args[index + 1].clone();
-            } else if flag == "--no-display" {
-                display = false;
-            } else if flag == "--prompt" {
-                prompt_set = true;
-                query = args[index + 1].clone();
-            } else if flag == "--raw" {
-                display = false;
-                print_raw = true;
-            } else if flag == "--clear-old" {
-                clear_recent = true;
+            match flag.to_string().as_str() {
+                "--output" => {
+                    result_path = args[index + 1].clone();
+                }
+                "--no-display" => {
+                    display = false;
+                }
+                "--prompt" => {
+                    prompt_set = true;
+                    query = args[index + 1].clone();
+                }
+                "--raw" => {
+                    display = false;
+                    print_raw = true;
+                }
+                "--clear-old" => {
+                    clear_recent = true;
+                }
+                "--image" => {
+                    include_image = true;
+                    image_path = args[index + 1].clone();
+                    image_data = read_image(&image_path.to_string())?;
+                }
+                "--cwd" => {
+                    response_path = "response.json".to_string();
+                    result_path = "result.md".to_string();
+                }
+                _ => {}
             }
         }
 
@@ -114,7 +160,47 @@ fn main() -> Result<()> {
             Ok(data.len())
         })?;
 
-        let post_data: String = format!(r#"{{"contents":[{{"parts":[{{"text":"{}"}}]}}]}}"#, query);
+        let post_data: String;
+        if include_image {
+            post_data = format!(
+                r#"
+                {{
+                    "contents":[
+                        {{
+                            "parts":[
+                                {{
+                                    "text":"{}"
+                                }},
+                                {{ 
+                                    "inlineData": 
+                                        {{
+                                            "mimeType": "image/png",
+                                            "data": "{}"
+                                        }}
+                                }}
+                            ]
+                        }}
+                    ]
+                }}"#,
+                query, image_data
+            );
+        } else {
+            post_data = format!(
+                r#"
+                {{
+                    "contents":[
+                        {{
+                            "parts":[
+                                {{
+                                    "text":"{}"
+                                }}
+                            ]
+                        }}
+                     ]
+                }}"#,
+                query
+            );
+        }
 
         easy.post_fields_copy(&post_data.into_bytes())?;
         easy.perform()?;
@@ -150,16 +236,32 @@ fn main() -> Result<()> {
             }
 
             let mut md = open(&result_path)?;
-            md.write(
-                &format!(
-                    r#"
+            if !include_image {
+                md.write(
+                    &format!(
+                        r#"
 # Prompt : {}
 
 "#,
-                    query
-                )
-                .into_bytes(),
-            )?;
+                        query
+                    )
+                    .into_bytes(),
+                )?;
+            } else {
+                md.write(
+                    &format!(
+                        r#"
+# Prompt : {}
+## Image :
+![uploaded image]({})
+
+"#,
+                        query,
+                        get_absolute_path(&image_path)?
+                    )
+                    .into_bytes(),
+                )?;
+            }
             md.write_all(&result.into_bytes())?;
             md.write(
                 &format!(

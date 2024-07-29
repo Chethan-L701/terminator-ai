@@ -13,7 +13,7 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +292 ~/Workspace/Rust/gemini-cli/src/main.rs
+badd +1 ~/Workspace/Rust/gemini-cli/src/main.rs
 argglobal
 %argdel
 edit ~/Workspace/Rust/gemini-cli/src/main.rs
@@ -34,90 +34,109 @@ setlocal fml=1
 setlocal fdn=0
 setlocal fen
 silent! normal! zE
-13,14fold
-13,15fold
-13,16fold
-13,17fold
-13,18fold
-12,19fold
-23,24fold
-23,25fold
-23,26fold
-23,27fold
-21,28fold
-30,40fold
-44,45fold
-44,46fold
-44,47fold
-44,48fold
-50,54fold
-50,56fold
-50,56fold
-42,57fold
-59,63fold
-65,67fold
-78,81fold
-98,102fold
-97,106fold
-97,109fold
-97,109fold
-113,115fold
-116,118fold
-119,122fold
-123,126fold
+9,11fold
+14,20fold
+24,30fold
+23,31fold
+22,32fold
+35,43fold
+46,56fold
+61,64fold
+65,69fold
+61,72fold
+61,72fold
+76,78fold
+79,81fold
+82,84fold
+85,87fold
+88,91fold
+92,95fold
+96,99fold
+75,102fold
+74,103fold
+58,105fold
+45,106fold
+117,118fold
+117,119fold
+117,120fold
+117,121fold
+117,122fold
+116,123fold
+127,128fold
 127,129fold
-130,134fold
-135,138fold
-112,140fold
-111,141fold
-143,146fold
+127,130fold
+127,131fold
+125,132fold
+134,144fold
+148,149fold
+148,150fold
 148,151fold
-158,161fold
-165,186fold
-164,187fold
-188,202fold
-164,203fold
-164,203fold
-217,218fold
-217,219fold
-216,220fold
-216,221fold
-216,222fold
-216,223fold
-216,224fold
-216,225fold
-216,226fold
-216,227fold
-229,232fold
-234,236fold
-241,247fold
-241,248fold
-240,249fold
-239,250fold
-252,261fold
-252,262fold
-251,263fold
-239,264fold
-239,264fold
-267,271fold
-267,272fold
-266,273fold
-276,279fold
-275,280fold
-208,281fold
-208,283fold
-208,283fold
-87,284fold
-285,288fold
-87,289fold
-87,289fold
-69,292fold
+148,152fold
+154,158fold
+154,160fold
+154,160fold
+146,161fold
+163,167fold
+108,168fold
+171,174fold
+185,188fold
+192,214fold
+191,215fold
+216,230fold
+191,231fold
+191,231fold
+170,237fold
+247,248fold
+247,249fold
+246,250fold
+246,251fold
+246,252fold
+246,253fold
+246,254fold
+246,255fold
+246,256fold
+246,257fold
+263,272fold
+263,273fold
+262,274fold
+261,275fold
+277,283fold
+277,284fold
+276,285fold
+261,286fold
+261,286fold
+289,293fold
+289,294fold
+288,295fold
+239,298fold
+305,307fold
+305,308fold
+305,309fold
+304,310fold
+303,312fold
+316,318fold
+316,319fold
+316,320fold
+315,321fold
+314,323fold
+302,324fold
+301,325fold
+300,326fold
+331,334fold
+340,343fold
+340,345fold
+340,345fold
+338,346fold
+347,350fold
+338,351fold
+338,351fold
+328,354fold
 let &fdl = &fdl
-let s:l = 292 - ((42 * winheight(0) + 21) / 43)
+let s:l = 39 - ((38 * winheight(0) + 21) / 43)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 292
+keepjumps 39
 normal! 0
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'

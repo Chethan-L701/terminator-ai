@@ -1,0 +1,26 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "Get the schema for the config file"
+        },
+        "api": {
+            "type": "string",
+            "description": "Your gemini API Key that is used to prompt"
+        },
+        "basedir": {
+            "type": "string",
+            "description": "Base directory where all the program related file and the result or stored"
+        },
+        "default_session" : {
+            "type":"string",
+            "description" : "Directory to be used when the session flag is not given (relative the base directory)"
+        }
+    },
+    "required": [
+        "api"
+    ],
+    "additionalProperties": false
+}

@@ -1,7 +1,11 @@
+use colored::*;
+use rand::{self, Rng};
 use regex::Regex;
+use sha256;
 use std::fs;
-use std::io::{ErrorKind, Result};
-use std::path;
+use std::io::{self, ErrorKind, Result};
+use std::iter;
+use std::path::{self, Path};
 use std::process::Command;
 
 pub fn open(file_path: &String) -> Result<std::fs::File> {
@@ -37,8 +41,7 @@ pub fn process_newlines(input: &str) -> String {
     return result;
 }
 
-pub fn read_image(path: &str) -> Result<String> {
-    println!("Enter the image path :");
+pub fn read_image(path: &str) -> Result<(String, String)> {
     let output = Command::new("base64")
         .arg("-w0")
         .arg(path.trim())
@@ -46,10 +49,12 @@ pub fn read_image(path: &str) -> Result<String> {
         .unwrap();
 
     if output.status.success() {
-        println!("Command exucuted successfully");
         let data = String::from_utf8(output.stdout.clone()).unwrap();
-        return Ok(data);
+        let hash = generate_random_hash();
+        return Ok((hash, data));
     } else {
+        let data = String::from_utf8(output.stderr.clone()).unwrap();
+        println!("{} :\n{}", "Base64 Error".red(), data);
         return Err(ErrorKind::Other.into());
     }
 }
@@ -64,4 +69,61 @@ pub fn make_session(path: &path::Path) {
     if !path.is_dir() {
         let _ = fs::create_dir_all(path.to_str().unwrap());
     };
+}
+
+fn generate_random_hash() -> String {
+    let mut rng = rand::thread_rng();
+    let random_string: String = iter::repeat(())
+        .map(|()| rng.sample(rand::distributions::Alphanumeric))
+        .take(30)
+        .map(char::from)
+        .collect();
+
+    let hash = sha256::digest(random_string);
+
+    return hash;
+}
+
+pub fn copy_image(source: &String, savedir: &String, hash: &String) -> Result<String> {
+    let savefile = format!(
+        "{}/images/{}.{}",
+        savedir,
+        hash,
+        source.split('.').last().unwrap()
+    );
+    println!("source : {}\ndest : {}", source, savefile);
+    fs::create_dir_all(format!("{}/images", savedir))?;
+    fs::copy(source, &savefile)?;
+    return Ok(format!(
+        "./images/{}.{}",
+        hash,
+        source.split('.').last().unwrap()
+    ));
+}
+
+pub fn delete_session(path: &String, session: &String) -> Result<()> {
+    println!("path : {}", path);
+    let dir = Path::new(&path);
+    if dir.exists() {
+        println!(
+            "Do you really want to {} the session {}?[Y/N]",
+            "delete".red(),
+            session.yellow()
+        );
+        let mut ch = String::new();
+        io::stdin().read_line(&mut ch)?;
+        let ch: String = ch.trim().to_string();
+        match &*ch {
+            "Y" | "y" => {
+                fs::remove_dir_all(&dir.to_str().unwrap())?;
+                println!("`{}` session was deleted successfully.", session.red());
+            }
+            _ => {
+                println!("`{}` session was not deleted.", session.green());
+            }
+        };
+    } else {
+        println!("Are you sure there is a session called {}?", session.blue());
+    }
+    std::process::exit(0);
 }

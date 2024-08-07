@@ -121,6 +121,7 @@ fn write_result(flags: &Flags) -> Result<()> {
     .to_string();
 
     let mut md = utils::open(&flags.result.clone().unwrap())?;
+    println!("embedding image into the md file");
 
     if let Some(image_path) = &flags.image_path {
         md.write(
@@ -132,7 +133,7 @@ fn write_result(flags: &Flags) -> Result<()> {
 
 "#,
                 flags.query.clone().unwrap(),
-                utils::get_absolute_path(&image_path)?
+                image_path
             )
             .into_bytes(),
         )?;

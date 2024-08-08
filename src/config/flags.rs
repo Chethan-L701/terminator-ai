@@ -3,7 +3,6 @@ use colored::Colorize;
 use crate::utils;
 use crate::{config::configfile::Config, config::display::DisplayMode};
 use std::io::Result;
-use std::path::Path;
 
 #[derive(Clone)]
 
@@ -117,10 +116,9 @@ impl Flags {
             utils::delete_session(&session_path, &session)?;
         }
 
-        let path = Path::new(&session_path);
-        utils::make_session(&path);
-
         flags.savedir = session_path.clone();
+        utils::make_session(&flags)?;
+
         if !flags.temp {
             flags.response = format!("{}/response.json", &session_path).into();
             flags.result = format!("{}/result.md", &session_path).into();

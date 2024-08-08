@@ -1,3 +1,5 @@
+pub mod templates;
+
 use colored::*;
 use rand::{self, Rng};
 use regex::Regex;
@@ -7,6 +9,8 @@ use std::io::{self, ErrorKind, Result};
 use std::iter;
 use std::path::{self, Path};
 use std::process::Command;
+
+use crate::Flags;
 
 pub fn open(file_path: &String) -> Result<std::fs::File> {
     fs::OpenOptions::new()
@@ -26,6 +30,7 @@ pub fn overwrite(file_path: &String) -> Result<fs::File> {
         .create(true)
         .append(false)
         .write(true)
+        .read(true)
         .open(file_path)
 }
 
@@ -65,10 +70,14 @@ pub fn get_absolute_path(path: &str) -> Result<String> {
     Ok(absolute_path.to_str().unwrap().to_string())
 }
 
-pub fn make_session(path: &path::Path) {
-    if !path.is_dir() {
+pub fn make_session(flags: &Flags) -> Result<()> {
+    let savedir = &flags.savedir.clone();
+    let path = Path::new(&savedir);
+    if !path.exists() {
         let _ = fs::create_dir_all(path.to_str().unwrap());
+        crate::context::initialize_context(&flags.savedir.clone())?;
     };
+    return Ok(());
 }
 
 fn generate_random_hash() -> String {

@@ -1,5 +1,8 @@
 /target
+*.vim
 /temp
 .nvim
 *.vim
 test.md
+.vscode
+.nvim

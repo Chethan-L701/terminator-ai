@@ -11,12 +11,25 @@
             "description": "Your gemini API Key that is used to prompt"
         },
         "basedir": {
-            "type": "string",
+            "type": [
+                "string",
+                "null"
+            ],
             "description": "Base directory where all the program related file and the result or stored"
         },
-        "default_session" : {
-            "type":"string",
-            "description" : "Directory to be used when the session flag is not given (relative the base directory)"
+        "default_session": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "Directory to be used when the session flag is not given (relative the base directory)"
+        },
+        "default_viewer": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "description": "Default way to open the result.md file."
         }
     },
     "required": [

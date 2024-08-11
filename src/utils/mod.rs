@@ -1,5 +1,3 @@
-pub mod templates;
-
 use colored::*;
 use rand::{self, Rng};
 use regex::Regex;

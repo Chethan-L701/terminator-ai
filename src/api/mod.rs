@@ -17,7 +17,7 @@ pub fn api_call(flags: Flags, api: String) -> Result<u32> {
     let mut headers = List::new();
     headers.append("Content-Type: application/json")?;
 
-    let mut response = utils::overwrite(&flags.response.clone().unwrap())?;
+    let mut response = utils::overwrite(&flags.responsefile.clone().unwrap())?;
     let mut easy = Easy::new();
     easy.url(&url)?;
     easy.post(true)?;
@@ -96,8 +96,8 @@ pub fn api_call(flags: Flags, api: String) -> Result<u32> {
     return Ok(response_code);
 }
 
-pub fn write_result(flags: &Flags) -> Result<()> {
-    let mut response_json = File::open(flags.response.clone().unwrap())?;
+pub fn write_result(flags: &mut Flags) -> Result<()> {
+    let mut response_json = File::open(flags.responsefile.clone().unwrap())?;
     let mut content = String::new();
     response_json.read_to_string(&mut content)?;
 
@@ -115,7 +115,7 @@ pub fn write_result(flags: &Flags) -> Result<()> {
         .fold(String::new(), |acc, line| acc + &line + "\n")
         .to_string();
 
-    let mut md = utils::open(&flags.result.clone().unwrap())?;
+    let mut md = utils::open(&flags.resultfile.clone().unwrap())?;
 
     if let Some(image_path) = &flags.image_path {
         md.write(
@@ -143,7 +143,8 @@ pub fn write_result(flags: &Flags) -> Result<()> {
             .into_bytes(),
         )?;
     }
-    md.write_all(&result.into_bytes())?;
+    md.write_all(&result.clone().into_bytes())?;
+    flags.resulttext = result.into();
     md.write(
         &format!(
             r#"

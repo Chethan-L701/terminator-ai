@@ -4,14 +4,17 @@ use crate::utils;
 use crate::{config::configfile::Config, config::display::DisplayMode};
 use std::io::Result;
 
+use super::configfile;
+
 #[derive(Clone)]
 
 pub struct Flags {
     pub query: Option<String>,
     pub image: Option<String>,
     pub image_path: Option<String>,
-    pub response: Option<String>,
-    pub result: Option<String>,
+    pub responsefile: Option<String>,
+    pub resultfile: Option<String>,
+    pub resulttext: Option<String>,
     pub custom_command: Option<String>,
     pub savedir: String,
     pub display_mode: DisplayMode,
@@ -23,13 +26,14 @@ impl Flags {
     pub fn default() -> Self {
         Self {
             query: None,
-            display_mode: DisplayMode::Normal,
+            display_mode: DisplayMode::Defualt,
             image: None,
             image_path: None,
-            response: None,
+            responsefile: None,
             custom_command: None,
             savedir: "".into(),
-            result: None,
+            resultfile: None,
+            resulttext: None,
             imghash: None,
             temp: false,
             delete: false,
@@ -48,6 +52,10 @@ impl Flags {
             std::process::exit(0);
         }
 
+        if args[1] == "config" {
+            configfile::create()?;
+        }
+
         match &config.basedir {
             Some(dir) => {
                 basedir = dir.into();
@@ -62,6 +70,10 @@ impl Flags {
                 session = sess.into();
             }
             None => session = "".into(),
+        }
+
+        if let Some(_) = &config.default_viewer {
+            flags.display_mode = DisplayMode::Config
         }
 
         for (index, flag) in args.iter().enumerate() {
@@ -99,7 +111,6 @@ impl Flags {
                     flags.display_mode = DisplayMode::Custom;
                     flags.custom_command = args[index + 1].clone().into()
                 }
-                "--plain" => flags.display_mode = DisplayMode::Plain,
                 "--delete" => flags.delete = true,
                 _ => {}
             }
@@ -120,11 +131,11 @@ impl Flags {
         utils::make_session(&flags)?;
 
         if !flags.temp {
-            flags.response = format!("{}/response.json", &session_path).into();
-            flags.result = format!("{}/result.md", &session_path).into();
+            flags.responsefile = format!("{}/response.json", &session_path).into();
+            flags.resultfile = format!("{}/result.md", &session_path).into();
         } else {
-            flags.response = "response.json".to_string().into();
-            flags.response = "result.md".to_string().into();
+            flags.responsefile = "response.json".to_string().into();
+            flags.responsefile = "result.md".to_string().into();
         }
 
         if let Some(image_path) = &flags.image_path.clone() {
@@ -138,7 +149,7 @@ impl Flags {
         }
 
         if output != "" {
-            flags.result = Some(output);
+            flags.resultfile = Some(output);
         }
 
         Ok(flags)

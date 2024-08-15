@@ -82,7 +82,7 @@ pub fn api_call(flags: Flags, api: String) -> Result<u32> {
     });
 
     let _ = handle.join();
-    spinner.finish_with_message("Done!");
+    spinner.finish_with_message("\rDone!\n");
     let response_code = *response_code.lock().unwrap();
 
     if response_code >= 200 && response_code <= 299 {
@@ -107,7 +107,6 @@ pub fn write_result(flags: &mut Flags) -> Result<()> {
     let result_data = &rawtext.trim_matches('"');
     context::add_model_context(flags, result_data.to_string())?;
     let result = utils::process_newlines(result_data)
-        .replace("** ", "**")
         .replace(":", ": ")
         .replace("\\\"", "\"")
         .lines()

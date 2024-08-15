@@ -1,12 +1,12 @@
+use base64::display::Base64Display;
 use colored::*;
 use rand::{self, Rng};
 use regex::Regex;
 use sha256;
 use std::fs;
-use std::io::{self, ErrorKind, Result};
+use std::io::{self, Read, Result};
 use std::iter;
 use std::path::{self, Path};
-use std::process::Command;
 
 use crate::Flags;
 
@@ -44,22 +44,13 @@ pub fn process_newlines(input: &str) -> String {
     return result;
 }
 
-pub fn read_image(path: &str) -> Result<(String, String)> {
-    let output = Command::new("base64")
-        .arg("-w0")
-        .arg(path.trim())
-        .output()
-        .unwrap();
-
-    if output.status.success() {
-        let data = String::from_utf8(output.stdout.clone()).unwrap();
-        let hash = generate_random_hash();
-        return Ok((hash, data));
-    } else {
-        let data = String::from_utf8(output.stderr.clone()).unwrap();
-        println!("{} :\n{}", "Base64 Error".red(), data);
-        return Err(ErrorKind::Other.into());
-    }
+pub fn read_image(imgpath: &String) -> Result<(String, String)> {
+    let mut file = fs::File::open(imgpath)?;
+    let mut filebinary: Vec<u8> = vec![];
+    file.read_to_end(&mut filebinary)?;
+    let value = Base64Display::new(&filebinary, &base64::engine::general_purpose::STANDARD);
+    let hash = generate_random_hash();
+    return Ok((hash, value.to_string()));
 }
 
 pub fn get_absolute_path(path: &str) -> Result<String> {

@@ -25,3 +25,9 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
+// fn main() -> Result<()> {
+//     let imgpath = String::from("C:/Users/Cheth/Pictures/neon.png");
+//     utils::read_image(&imgpath)?;
+//     return Ok(());
+// }

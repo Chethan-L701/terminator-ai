@@ -8,8 +8,6 @@ use std::io::{self, Read, Result};
 use std::iter;
 use std::path::{self, Path};
 
-use crate::Flags;
-
 pub fn open(file_path: &String) -> Result<std::fs::File> {
     fs::OpenOptions::new()
         .write(true)
@@ -59,14 +57,31 @@ pub fn get_absolute_path(path: &str) -> Result<String> {
     Ok(absolute_path.to_str().unwrap().to_string())
 }
 
-pub fn make_session(flags: &Flags) -> Result<()> {
-    let savedir = &flags.savedir.clone();
+pub fn make_session(savedir: &String, term_mode: bool) -> Result<()> {
     let path = Path::new(&savedir);
     if !path.exists() {
         let _ = fs::create_dir_all(path.to_str().unwrap());
-        crate::context::initialize_context(&flags.savedir.clone())?;
+        crate::context::initialize_context(&savedir.clone(), term_mode)?;
     };
     return Ok(());
+}
+
+pub fn list_sessions(basedir: &String) -> Result<()> {
+    for session in fs::read_dir(basedir)? {
+        let entry = session?.path();
+        if entry.is_dir() {
+            let sessionpath = entry.to_str().unwrap();
+            let sessionname = sessionpath.split('\\').last().unwrap().to_string();
+            let resultstr = format!("{}/result.md", sessionpath);
+            let resultfile = path::Path::new(&resultstr);
+            if resultfile.exists() {
+                println!("{}", sessionname.blue());
+            } else {
+                println!("{}", sessionname.yellow());
+            }
+        }
+    }
+    std::process::exit(0);
 }
 
 fn generate_random_hash() -> String {
@@ -124,4 +139,47 @@ pub fn delete_session(path: &String, session: &String) -> Result<()> {
         println!("Are you sure there is a session called {}?", session.blue());
     }
     std::process::exit(0);
+}
+
+fn find_executable(path: &String) -> Vec<String> {
+    // COM;EXE;BAT;CMD;VBS;VBE;WSF;WSH;MSC;PS1;
+    let pathtext: Vec<String> = "com;exe;bat;cmd;vbs;vbe;wsf;wsh;msc;ps1"
+        .split(';')
+        .map(|t| t.to_string())
+        .collect();
+
+    let mut executables: Vec<String> = vec![];
+
+    for entry in fs::read_dir(path).unwrap() {
+        let entrypath = entry.unwrap().path();
+        if !entrypath.is_dir() {
+            let file_type = entrypath
+                .to_str()
+                .unwrap()
+                .split('.')
+                .last()
+                .unwrap()
+                .to_string();
+            if pathtext.contains(&file_type) {
+                executables.push(entrypath.to_str().unwrap().to_string());
+            }
+        }
+    }
+    return executables;
+}
+
+pub fn executables() -> Vec<Vec<String>> {
+    let pathvar = std::env::var("path").unwrap();
+    let paths: Vec<String> = pathvar.split(';').map(|path| path.to_string()).collect();
+    let mut executables: Vec<Vec<String>> = vec![];
+    for pathstr in paths {
+        let path = path::Path::new(&pathstr);
+        if path.exists() {
+            let pathexes = find_executable(&path.to_str().unwrap().to_string());
+            if pathexes.len() > 0 {
+                executables.push(pathexes);
+            }
+        }
+    }
+    return executables;
 }

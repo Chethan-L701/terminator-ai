@@ -27,7 +27,9 @@ fn main() -> Result<()> {
 }
 
 // fn main() -> Result<()> {
-//     let imgpath = String::from("C:/Users/Cheth/Pictures/neon.png");
-//     utils::read_image(&imgpath)?;
+//     let args: Vec<String> = env::args().collect();
+//     let userconf = Config::parse()?;
+//     let flags = Flags::parse(&userconf, args)?;
+//     println!("{}", &flags.savedir);
 //     return Ok(());
 // }

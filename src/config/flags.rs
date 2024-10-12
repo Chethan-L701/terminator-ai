@@ -21,6 +21,7 @@ pub struct Flags {
     pub temp: bool,
     pub imghash: Option<String>,
     pub delete: bool,
+    pub term_mode: bool,
 }
 impl Flags {
     pub fn default() -> Self {
@@ -37,6 +38,7 @@ impl Flags {
             imghash: None,
             temp: false,
             delete: false,
+            term_mode: false,
         }
     }
 
@@ -54,6 +56,10 @@ impl Flags {
 
         if args[1] == "config" {
             configfile::create()?;
+        }
+
+        if args[1] == "ls" {
+            utils::list_sessions(&config.basedir.clone().unwrap())?
         }
 
         match &config.basedir {
@@ -116,19 +122,30 @@ impl Flags {
             }
         }
 
-        let session_path = format!("{}/{}", &basedir, &session);
-        let session = session
+        if args[1] == "term" {
+            flags.term_mode = true;
+        }
+
+        session = session
             .split(' ')
             .map(|x| x.to_string())
             .fold(String::new(), |acc, x| acc + &x)
             .to_string();
+
+        let session_path: String;
+
+        if flags.term_mode {
+            session_path = format!("{}/{}/{}", &basedir, "term", &session);
+        } else {
+            session_path = format!("{}/{}", &basedir, &session);
+        }
 
         if flags.delete {
             utils::delete_session(&session_path, &session)?;
         }
 
         flags.savedir = session_path.clone();
-        utils::make_session(&flags)?;
+        utils::make_session(&flags.savedir.clone(), flags.term_mode)?;
 
         if !flags.temp {
             flags.responsefile = format!("{}/response.json", &session_path).into();

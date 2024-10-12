@@ -65,12 +65,16 @@ pub fn api_call(flags: Flags, api: String) -> Result<u32> {
     easy.post_fields_copy(json!(context).to_string().as_bytes())?;
 
     let spinner = ProgressBar::new_spinner();
-    spinner.set_style(
-        ProgressStyle::default_spinner()
-            .tick_chars("⡿⣟⣯⣷⣾⣽⣻⢿")
-            .template("{spinner} {msg}")
-            .expect("Failed to set template"),
-    );
+
+    if !flags.term_mode {
+        spinner.set_style(
+            ProgressStyle::default_spinner()
+                .tick_chars("⡿⣟⣯⣷⣾⣽⣻⢿")
+                .template("{spinner} {msg}")
+                .expect("Failed to set template"),
+        );
+    }
+
     spinner.enable_steady_tick(time::Duration::from_millis(100));
     spinner.set_message("Fetching Result...");
 
@@ -82,7 +86,11 @@ pub fn api_call(flags: Flags, api: String) -> Result<u32> {
     });
 
     let _ = handle.join();
-    spinner.finish_with_message("\rDone!\n");
+
+    if !flags.term_mode {
+        spinner.finish_with_message("\rDone!\n");
+    }
+
     let response_code = *response_code.lock().unwrap();
 
     if response_code >= 200 && response_code <= 299 {
